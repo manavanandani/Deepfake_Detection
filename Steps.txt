@@ -1,0 +1,10 @@
+conda create -n project_deepfake_image python==3.10.0
+conda activate project_deepfake_image
+pip install -r requirements.txt
+
+python convert_video_to_image.py
+python crop_faces_with_mtcnn.py
+python prepare_fake_real_dataset.py
+python train_cnn.py
+python classify_image.py
+python classify_videos.py

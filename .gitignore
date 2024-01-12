@@ -1,0 +1,7 @@
+./model/
+./prepared_dataset/
+./split_dataset/
+./venv/
+./train_sample_videos/
+./uploadImg/
+./uploadVid/

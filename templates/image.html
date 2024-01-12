@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700&display=swap" rel="stylesheet">
+    <title>Image Upload and Detection</title>
+    <style>
+        body {
+            font-family: Rubik;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: black;
+            color: #fff;
+            text-align: center;
+        }
+
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+        }
+
+        .navbar a {
+            float: left;
+            font-size: 18px;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        .navbar a.active {
+            background-color: #FD788B;
+        }
+
+        .navbar a:hover {
+            background-color: #555;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 15px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            color: black;    
+        }
+
+        h2 {
+            font-size: 28px;
+            color: #333;
+        }
+
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .upload-container {
+            text-align: center;
+        }
+
+        .file-submit-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-button {
+            background-color: #ea1031;
+            color: #fff;
+            padding: 10px 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px;
+            margin-bottom: 0px;
+        }
+
+        .upload-button:hover {
+            background-color: #FFCED2;
+        }
+
+        #uploaded-image {
+            max-width: 200px;
+            max-height: 200px; 
+            margin-top: 20px;
+            display: none;
+        }
+
+        #detection-results {
+            margin-top: 20px;
+            color: #333;
+        }
+
+        .active {
+            background-color: #FD788B;
+        }
+
+        .head {
+            color: #FFCED2;
+            font-size: 30px;
+            margin: 0;
+            padding: 0;
+        }
+
+        #result-container{
+            color: black;
+        }
+        .container h2, p{
+            color: black;
+        }
+        .no-file-chosen{
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="{{ image }}" style="height: 80px; width: 500px">
+</div>
+<div class="navbar">
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('image') }}" class="active">Image</a>
+    <a href="{{ url_for('video') }}">Video</a>
+</div>
+<div class="container">
+    <h2>Upload an Image</h2>
+    <p>Upload an image, and our model will analyze it for any signs of deepfake manipulation.</p>
+    <div class="upload-container">
+        <form method="POST" action="" enctype="multipart/form-data">
+            <div class="file-submit-container">
+                <label for="image-upload" class="upload-button">Choose File</label>
+                <input type="file" name="file" class="file-input" id="image-upload" accept="image/*">
+                <span class="no-file-chosen">No file chosen</span>
+                <input type="submit" value="Submit" class="upload-button" style="font-family: Rubik;">
+            </div>
+            <img id="uploaded-image" src="" alt="Uploaded Image">
+        </form>
+    </div>
+    <div id="result-container">
+        <h3>Prediction Results:</h3>
+        <p>Real (%): <span id="real-percent">{{ real_percent }}</span></p>
+        <p>Fake (%): <span id="fake-percent">{{ fake_percent }}</span></p>
+    </div>
+</div>
+<script>
+    const fileInput = document.getElementById('image-upload');
+    const uploadedImage = document.getElementById('uploaded-image');
+    const noFileChosen = document.querySelector('.file-submit-container span');
+
+    fileInput.addEventListener('change', function () {
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                uploadedImage.src = e.target.result;
+                uploadedImage.style.display = 'block';
+                uploadedImage.style.width = '250px'; 
+                uploadedImage.style.height = '250px'; 
+                noFileChosen.style.display = 'none'; 
+            };
+            reader.readAsDataURL(file);
+        } else {
+            uploadedImage.src = '';
+            uploadedImage.style.display = 'none';
+            uploadedImage.style.width = 'auto'; 
+            uploadedImage.style.height = 'auto'; 
+            noFileChosen.style.display = 'block'; 
+        }
+    });
+</script>
+</body>
+</html>

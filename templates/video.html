@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700&display=swap" rel="stylesheet">
+    <title>File Upload</title>
+    <style>
+        body {
+            font-family: Rubik;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: black;
+            text-align: center;
+            padding: 2px 0;
+        }
+
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+        }
+
+        .navbar a {
+            float: left;
+            font-size: 18px;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 15px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 28px;
+            color: #333;
+        }
+
+        p {
+            font-size: 15px;
+            margin-bottom: 40px;
+            color: #555;
+        }
+
+        .upload-container {
+            margin: 10px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #video-upload {
+            display: none;
+        }
+
+        .upload-button {
+            background-color: #ea1031;
+            color: #fff;
+            padding: 10px 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        input[type="submit"] {
+            background-color: #ea1031;
+            color: #fff;
+            padding: 10px 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 20px;
+        }
+
+        #uploaded-video {
+            max-width: 250px;
+            max-height: 250px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .no-file-chosen {
+            color: #555;
+        }
+        .loader {
+            border: 16px solid #f3f3f3; 
+            border-top: 16px solid #3498db;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            animation: spin 2s linear infinite;
+            position: absolute; 
+            top: 50%;
+            left: 50%;
+            margin-top: -40px;
+            margin-left: -40px;
+            display: none;
+        }   
+        .navbar a.active {
+            background-color: #FD788B;
+        }
+        .head {
+            color: #FFCED2;
+            font-size: 30px;
+            margin: 0;
+            padding: 20px;
+        }
+        #result-container{
+            color: black;
+        }
+        #result-container h3,p{
+            color: black;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="{{ image }}" style="height: 80px; width: 500px">
+</div>
+<div class="navbar">
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('image') }}">Image</a>
+    <a href="{{ url_for('video') }}" class="active">Video</a>
+</div>
+<div class="container">
+    <h2>Upload a Video</h2>
+    <p>Upload a video, and our model will analyze it for any signs of deepfake manipulation.</p>
+
+    <div class="upload-container">
+        <form method="POST" action="" enctype="multipart/form-data">
+            <div style="flex: 1;">
+                <label for="video-upload" class="upload-button">Choose File</label>
+                <span class="no-file-chosen">No file chosen</span>
+                <input type="file" name="file" id="video-upload">
+                <input type="submit" value="Submit" style="font-family: Rubik;">
+            </div>
+        </form>
+    </div>
+
+    <div class="video-container">
+        <video id="uploaded-video" controls></video>
+    </div>
+    <div id="result-container">
+        <h3>Prediction Results:</h3>
+        <p>Real (%): <span id="real-percent">{{ real_percent }}</span></p>
+        <p>Fake (%): <span id="fake-percent">{{ fake_percent }}</span></p>
+    </div>
+    <div id="loader" class="loader"></div>
+</div>
+    <script>
+        const videoUpload = document.getElementById('video-upload');
+        const uploadedVideo = document.getElementById('uploaded-video');
+        const noFileChosen = document.querySelectorAll('.no-file-chosen');
+
+        videoUpload.addEventListener('change', function () {
+            const file = videoUpload.files[0];
+            if (file) {
+                const videoURL = URL.createObjectURL(file);
+                uploadedVideo.src = videoURL;
+                uploadedVideo.style.display = 'block';
+                uploadedVideo.autoplay = true;
+                noFileChosen.forEach((element) => {
+                    element.style.display = 'none';
+                });
+            } else {
+                uploadedVideo.src = '';
+                uploadedVideo.style.display = 'none';
+                noFileChosen.forEach((element) => {
+                    element.style.display = 'inline';
+                });
+            }
+        });
+        const loader = document.getElementById('loader');
+   function showLoader() {
+    loader.style.display = 'block';
+}
+
+function hideLoader() {
+    loader.style.display = 'none';
+}
+
+videoUpload.addEventListener('change', function () {
+    showLoader();
+
+    const file = videoUpload.files[0];
+    if (file) {
+        const videoURL = URL.createObjectURL(file);
+        uploadedVideo.src = videoURL;
+        uploadedVideo.style.display = 'block';
+        uploadedVideo.autoplay = true;
+        noFileChosen.forEach((element) => {
+            element.style.display = 'none';
+        });
+
+     
+        setTimeout(function () {
+            hideLoader();
+            updatePrediction();
+        }, 4000);
+    } else {
+        uploadedVideo.src = '';
+        uploadedVideo.style.display = 'none';
+        noFileChosen.forEach((element) => {
+            element.style.display = 'inline';
+        });
+    }
+});
+
+function updatePrediction() {
+    showLoader();
+    setTimeout(function () {
+        const realPercentElement = document.getElementById('real-percent');
+        const fakePercentElement = document.getElementById('fake-percent');
+        const loader = document.getElementById('loader');
+
+        const predictionResults = {
+            real_percent: {real_percent},
+            fake_percent: {fake_percent}
+        };
+
+        realPercentElement.textContent = predictionResults.real_percent;
+        fakePercentElement.textContent = predictionResults.fake_percent;
+
+        hideLoader();
+    }, 4000);
+}
+    </script>
+</body>
+</html>
